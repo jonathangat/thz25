@@ -22,16 +22,100 @@
 </head>
 
 <body>
-    <!-- Warpper -->
 
-    <!-- Sidebar -->
+    <div class="container-fluid">
+        <div class="row flex-nowrap">
+            <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-light">
+                <div
+                    class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100 text-center">
+                    <!-- 
 
-    <!-- Main Map -->
+                    <img src="img/logos/thz25_logo.png" style="max-width:200px" class="mx-auto d-block img-fluid"
+                        alt="">
+
+                     -->
+                    <img src="img/logos/thz25_logo.png" class="img-fluid d-md-block d-none" alt="">
+                    <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start"
+                        id="menu">
+                        <li class="nav-item">
+                            <a href="#submenu1" data-bs-toggle="collapse" class="nav-link active align-middle px-0">
+                                <ion-icon name="bus-outline" class="fs-4"></ion-icon> <span
+                                    class="ms-1 d-none d-sm-inline">קווים</span>
+                            </a>
+                            <ul class="collapse show nav flex-column ms-1" id="submenu1" data-bs-parent="#menu">
+                                <li class="w-100">
+                                    <a href="#" class="nav-link px-0"><span class="d-none d-sm-inline">לפי </span>הכל
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="nav-link px-0"> <span class="d-none d-sm-inline">לפי</span> אזור
+                                        שיפוט
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="nav-link px-0"> <span class="d-none d-sm-inline">לפי</span> תחנות
+                                        משורתות
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#" class="nav-link px-0 align-middle">
+                                <ion-icon name="swap-horizontal-outline" class="fs-4"></ion-icon><span
+                                    class="ms-1 d-none d-sm-inline">מסופים</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="nav-link px-0 align-middle">
+                                <ion-icon name="trending-up-outline" class="fs-4"></ion-icon><span
+                                    class="ms-1 d-none d-sm-inline">נפחים</span>
+                            </a>
+                        </li>
+                    </ul>
+                    <hr>
+                </div>
+            </div>
+            <!-- Map -->
+            <div id="map" class="col py-3"></div>
+        </div>
+    </div>
+
+
 
     <!-- Load JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
         crossorigin="anonymous"></script>
+
+    <!-- ionicons -->
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"
+        integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
+        crossorigin=""></script>
+
+    <!-- Set the map -->
+    <script>
+        // set the map
+        var map = L.map('map').setView([51.505, -0.09], 13);
+
+        // add a basemap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        // add a marker
+        var marker = L.marker([51.5, -0.09]).addTo(map);
+
+
+    </script>
+
+
+
+
 
 </body>
 
