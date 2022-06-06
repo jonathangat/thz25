@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" href="https://www.ayalonhw.co.il/wp-content/uploads/2018/11/cropped-FAV-1-32x32.png"
         type="image/x-icon" />
+
     <title>קווי שירות מתוכננים</title>
 </head>
 
@@ -38,35 +39,42 @@
                     <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start"
                         id="menu">
                         <li class="nav-item">
-                            <a href="#submenu1" data-bs-toggle="collapse" class="nav-link active align-middle px-0">
+                            <a href="#submenu1" data-bs-toggle="collapse" class="nav-link align-middle px-0">
                                 <ion-icon name="bus-outline" class="fs-4"></ion-icon> <span
                                     class="ms-1 d-none d-sm-inline">קווים</span>
                             </a>
                             <ul class="collapse show nav flex-column ms-1" id="submenu1" data-bs-parent="#menu">
                                 <li class="w-100">
-                                    <a href="#" class="nav-link px-0"><span class="d-none d-sm-inline">לפי </span>הכל
+                                    <a href="#" class="nav-link px-0" id="get_all_routes"><span
+                                            class="d-none d-sm-inline">הצג</span> הכל
                                     </a>
+
                                 </li>
                                 <li>
-                                    <a href="#" class="nav-link px-0"> <span class="d-none d-sm-inline">לפי</span> אזור
+                                    <a href="#" id="populate_juris_select_btn" class="nav-link px-0"
+                                        data-bs-toggle="modal" data-bs-target="#JurisModal"> <span
+                                            class="d-none d-sm-inline">לפי</span> אזור
                                         שיפוט
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="#" class="nav-link px-0"> <span class="d-none d-sm-inline">לפי</span> תחנות
+                                    <a href="#" id="populate_stops_select_btn" class="nav-link px-0"
+                                        data-bs-toggle="modal" data-bs-target="#StopsModal"> <span
+                                            class="d-none d-sm-inline">לפי</span> תחנות
                                         משורתות
                                     </a>
                                 </li>
                             </ul>
                         </li>
                         <li>
-                            <a href="#" class="nav-link px-0 align-middle">
+                            <a href="#" id="get_all_terminals_btn" class="nav-link px-0 align-middle">
                                 <ion-icon name="swap-horizontal-outline" class="fs-4"></ion-icon><span
                                     class="ms-1 d-none d-sm-inline">מסופים</span>
                             </a>
                         </li>
                         <li>
-                            <a href="#" class="nav-link px-0 align-middle">
+                            <a href="#" class="nav-link px-0 align-middle" data-bs-toggle="modal"
+                                data-bs-target="#VolumeModal">
                                 <ion-icon name="trending-up-outline" class="fs-4"></ion-icon><span
                                     class="ms-1 d-none d-sm-inline">נפחים</span>
                             </a>
@@ -76,10 +84,81 @@
                 </div>
             </div>
             <!-- Map -->
-            <div id="map" class="col py-3"></div>
+            <div id="map" class="col py-3">
+            </div>
         </div>
     </div>
 
+    <!-- Select by Juris Modal -->
+    <div class="modal fade" id="JurisModal" tabindex="-1" aria-labelledby="JurisModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="JurisModalLabel">בחר קווי שירות לפי אזור שיפוט</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ion-icon name="location-outline" class="fs-4"></ion-icon>
+                    בחר רשות: <br />
+                    <select id="jurisSelect" class="form-select form-select-lg my-3"
+                        aria-label=".form-select-lg example">
+                    </select>
+                </div>
+
+
+                <div class="modal-footer">
+
+                    <button type="button" id="juris_select_btn" class="btn btn-primary" data-bs-dismiss="modal">בחר
+                        קווים</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Select by Stops -->
+    <div class="modal fade" id="StopsModal" tabindex="-1" aria-labelledby="StopsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="StopsModalLabel">בחר קווי שירות לפי תחנות משורתות</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ion-icon name="location-outline" class="fs-4"></ion-icon>
+                    בחר רשות: <br />
+                    <select id="StopsSelect" class="form-select form-select-lg my-3"
+                        aria-label=".form-select-lg example">
+                    </select>
+                </div>
+
+
+                <div class="modal-footer">
+
+                    <button type="button" id="stops_select_btn" class="btn btn-primary" data-bs-dismiss="modal">בחר
+                        קווים</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Volume Modal -->
+    <div class="modal fade" id="VolumeModal" tabindex="-1" aria-labelledby="VolumeModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="VolumeModalLabel">מפת נפחים</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ion-icon name="hammer-outline" class="fs-4"></ion-icon>
+                    השכבה בבנייה
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">סגור</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
     <!-- Load JS -->
@@ -96,22 +175,14 @@
         integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
         crossorigin=""></script>
 
+    <!-- Spin JS -->
+    <script src="./node_modules/spin.js/spin.min.js"></script>
+
+    <!-- leaflet-spin -->
+    <script src="./node_modules/leaflet-spin/leaflet.spin.min.js"></script>
+
     <!-- Set the map -->
-    <script>
-        // set the map
-        var map = L.map('map').setView([51.505, -0.09], 13);
-
-        // add a basemap
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap'
-        }).addTo(map);
-
-        // add a marker
-        var marker = L.marker([51.5, -0.09]).addTo(map);
-
-
-    </script>
+    <script src="js/webmap.js"></script>
 
 
 
