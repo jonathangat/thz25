@@ -104,7 +104,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // get all routes
   async function get_all_routes() {
     // start spinning!
-    //map.spin(true);
+    map.spin(true);
 
     // clear previous queries
     routeLayer.clearLayers();
@@ -274,7 +274,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     routeLayer.addTo(map);
 
     // stop spinning
-    //map.spin(false);
+    map.spin(false);
   }
 
   ///////////////////////////////////////////////
@@ -282,7 +282,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // get all routes
   async function get_all_terminals() {
     // start spinning!
-    //map.spin(true);
+    map.spin(true);
 
     // clear previous queries
     terminalLayer.clearLayers();
@@ -353,7 +353,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     terminalLayer.addTo(map);
 
     // stop spinning
-    //map.spin(false);
+    map.spin(false);
   }
 
   ////////////////////////////////////////////////////////////////
@@ -361,7 +361,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // get juris routes
   async function get_juris_routes() {
     // start spinning!
-    //map.spin(true);
+    map.spin(true);
 
     // get juris value
     let juris_value = document.getElementById("jurisSelect").value;
@@ -534,13 +534,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     routeLayer.addTo(map);
 
     // stop spinning
-    //map.spin(false);
+    map.spin(false);
   }
 
   // get juris routes
   async function get_stops_routes() {
     // start spinning!
-    //map.spin(true);
+    map.spin(true);
 
     // get juris value
     let juris_value = document.getElementById("StopsSelect").value;
@@ -713,7 +713,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     routeLayer.addTo(map);
 
     // stop spinning
-    //map.spin(false);
+    map.spin(false);
   }
 
   // add listeners
