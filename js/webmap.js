@@ -502,14 +502,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
       popupContent += `</div>`;
-      layer.bindPopup(popupContent);
+      // layer.bindPopup(popupContent);
 
       // get centre
       var centre = layer.getBounds().getCenter();
 
       var term_marker = L.marker(centre, {
         icon: get_term_icon(feature.properties.term_type),
-      });
+      }).bindPopup(popupContent);
 
       var polygonAndItsCentre = L.layerGroup([layer, term_marker]);
       polygonAndItsCentre.addTo(polygonsWithCenters);
