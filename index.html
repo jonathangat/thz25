@@ -16,6 +16,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@100;200;300;400;500;600;700;800;900&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <!-- BOOTSTRAP SELECT -->
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/css/bootstrap-select.min.css">
     <link rel="icon" href="https://www.ayalonhw.co.il/wp-content/uploads/2018/11/cropped-FAV-1-32x32.png"
         type="image/x-icon" />
 
@@ -38,40 +41,36 @@
                     <img src="img/logos/thz25_logo.png" class="img-fluid d-md-block d-none" alt="">
                     <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start"
                         id="menu">
-                        <li class="nav-item">
-                            <a href="#submenu1" data-bs-toggle="collapse" class="nav-link align-middle px-0">
-                                <ion-icon name="bus-outline" class="fs-4"></ion-icon> <span
-                                    class="ms-1 d-none d-sm-inline">קווים</span>
-                            </a>
-                            <ul class="collapse show nav flex-column ms-1" id="submenu1" data-bs-parent="#menu">
-                                <li class="w-100">
-                                    <a href="#" class="nav-link px-0" id="get_all_routes"><span
-                                            class="d-none d-sm-inline">הצג</span> הכל
-                                    </a>
-
-                                </li>
-                                <li>
-                                    <a href="#" id="populate_juris_select_btn" class="nav-link px-0"
-                                        data-bs-toggle="modal" data-bs-target="#JurisModal"> <span
-                                            class="d-none d-sm-inline">לפי</span> אזור
-                                        שיפוט
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#" id="populate_stops_select_btn" class="nav-link px-0"
-                                        data-bs-toggle="modal" data-bs-target="#StopsModal"> <span
-                                            class="d-none d-sm-inline">לפי</span> תחנות
-                                        משורתות
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
+                        <!-- Service Lines -->
                         <li>
-                            <a href="#" id="get_all_terminals_btn" class="nav-link px-0 align-middle">
-                                <ion-icon name="swap-horizontal-outline" class="fs-4"></ion-icon><span
-                                    class="ms-1 d-none d-sm-inline">מסופים</span>
+                            <a href="#" id="get_all_routes" class="nav-link px-0 align-middle">
+                                <ion-icon name="bus-outline" class="fs-4"></ion-icon><span
+                                    class="ms-1 d-none d-sm-inline">כל הקווים</span>
                             </a>
                         </li>
+                        <!-- JurisModal -->
+                        <li>
+                            <a href="#" id="populate_juris_select_btn" class="nav-link px-0 align-middle"
+                                data-bs-toggle="modal" data-bs-target="#JurisModal">
+                                <ion-icon name="location-outline" class="fs-4"></ion-icon><span
+                                    class="ms-1 d-none d-sm-inline">לפי איזור שיפוט</span>
+                            </a>
+                        </li>
+
+                        <!-- 
+
+                                                    <li>
+                            <a href="#" id="populate_stops_select_btn" class="nav-link px-0 align-middle"
+                                data-bs-toggle="modal" data-bs-target="#StopsModal">
+                                <ion-icon name="scan-circle-outline" class="fs-4"></ion-icon><span
+                                    class="ms-1 d-none d-sm-inline">לפי תחנות משורתות</span>
+                            </a>
+                        </li>
+
+
+
+                         -->
+
                         <li>
                             <a href="#" class="nav-link px-0 align-middle" data-bs-toggle="modal"
                                 data-bs-target="#VolumeModal">
@@ -103,6 +102,18 @@
                     <select id="jurisSelect" class="form-select form-select-lg my-3"
                         aria-label=".form-select-lg example">
                     </select>
+                    <br />
+                    בחר סוג קו:
+                    <select id="jurisTypeSelect" class="form-select form-select-lg my-3"
+                        aria-label=".form-select-lg example">
+                    </select>
+                    <br />
+                    <select id="jurisRouteIdSelect" class="selectpicker form-select-lg my-3 w-100 float-right"
+                        aria-label=".form-select-lg example" data-none-selected-text="בחר חלופות" multiple>
+                        <!-- form-select form-select-lg my-3  -->
+                    </select>
+
+
                 </div>
 
 
@@ -146,14 +157,22 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
+                    <ion-icon name="time-outline" class="fs-4 px-2"></ion-icon>
                     <h5 class="modal-title" id="VolumeModalLabel">מפת נפחים</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <ion-icon name="hammer-outline" class="fs-4"></ion-icon>
-                    השכבה בבנייה
+                    משעה:
+                    <select id="SelectVolumeFrom" class="form-select form-select-lg my-3"
+                        aria-label=".form-select-lg example"> </select><br />
+                    עד שעה:
+                    <select id="SelectVolumeTo" class="form-select form-select-lg my-3"
+                        aria-label=".form-select-lg example"> </select>
+                    </select>
+
                 </div>
                 <div class="modal-footer">
+                    <button type="button" class="btn btn-primary">הפקת שכבה</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">סגור</button>
                 </div>
             </div>
@@ -166,6 +185,14 @@
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
         crossorigin="anonymous"></script>
 
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.6/dist/umd/popper.min.js"
+        integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut"
+        crossorigin="anonymous"></script>
+
     <!-- ionicons -->
     <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
@@ -175,9 +202,21 @@
         integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
         crossorigin=""></script>
 
+    <!-- BOOTSTRAP-SELECT -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/js/bootstrap-select.min.js"></script>
+
+
     <!-- SPINNER -->
+
+    <!-- 
     <script src="./node_modules/spin.js/spin.min.js"></script>
     <script src="./node_modules/leaflet-spin/leaflet.spin.min.js"></script>
+
+ -->
+    <script src="./js/spin.min.js"></script>
+    <script src="./js/leaflet.spin.min.js"></script>
+
+
 
 
     <!-- Set the map -->
