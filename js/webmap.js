@@ -4,6 +4,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   var map = L.map("map").setView([31.950124877508276, 34.80287893972995], 10);
   let legend = L.control({ position: "bottomleft" });
 
+  function route_type_name(code) {
+    if (code === 1) return "עורקי";
+    if (code === 8) return "מקומי";
+    if (code === 2) return "אזורי";
+    if (code === 3) return "בינעירוני מטרופוליני";
+    if (code === 4) return "בינעירוני ארצי";
+    if (code === 5) return "פרימיום מטרופוליני";
+    if (code === 7) return `מתע"ן`;
+    return "אחר";
+  }
+
   // Adding a basemap (Carto Voyager)
   L.tileLayer(
     "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
@@ -169,17 +180,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     // fetch
     let request = fetch(q);
 
-    function route_type_name(code) {
-      if (code === 1) return "עירוני עורקי";
-      if (code === 8) return "עירוני מקומי";
-      if (code === 2) return "בינעירוני אזורי";
-      if (code === 3) return "בינעירוני מטרופוליני";
-      if (code === 4) return "בינעירוני ארצי";
-      if (code === 5) return "בינעירוני מהיר";
-      if (code === 7) return `קווי מתע"ן`;
-      return "אחר";
-    }
-
     request
       .then(function (response) {
         return response.json();
@@ -281,17 +281,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       return "gray";
     }
 
-    function route_type_name(code) {
-      if (code === 1) return "עירוני עורקי";
-      if (code === 8) return "עירוני מקומי";
-      if (code === 2) return "בינעירוני אזורי";
-      if (code === 3) return "בינעירוני מטרופוליני";
-      if (code === 4) return "בינעירוני ארצי";
-      if (code === 5) return "בינעירוני מהיר";
-      if (code === 7) return `קווי מתע"ן`;
-      return "אחר";
-    }
-
     function route_style(feature) {
       return {
         color: route_type_colour(feature.properties.c_line_type),
@@ -352,24 +341,45 @@ document.addEventListener("DOMContentLoaded", async () => {
       popupContent += "<br />";
 
       if (feature.properties.route_length) {
-        popupContent += `<b>אורך מסלול בק"מ:</b> ${Math.round(
-          feature.properties.route_length / 1000
-        )}<br />`;
+        popupContent += `<b>אורך מסלול במטרים:</b> ${feature.properties.route_length}<br />`;
       }
       if (feature.properties.bus_lane_length) {
-        popupContent += `<b>מתוכם נתיבי העדפה:</b> ${Math.round(
-          feature.properties.bus_lane_length / 1000
-        )}<br />`;
+        popupContent += `<b>מתוכם נתיבי העדפה:</b> ${feature.properties.bus_lane_length}<br />`;
       }
-      popupContent += `<b>מתוכם מתוכננים:</b> לחשב מחדש<br /><b>מתוכם קיימים:</b> לחשב מחדש<br /><b>אחוז העדפה קיים:</b> לחשב מחדש<br /><b>אחוז העדפה מתוכנן:</b> לחשב מחדש<br />`;
+      if (feature.properties.bus_lane_existing_length) {
+        popupContent += `<b>מתוכם קיימים: </b> ${feature.properties.bus_lane_existing_length}<br />`;
+      }
+      if (feature.properties.bus_lane_planned_length) {
+        popupContent += `<b>מתוכם מתוכננים: </b> ${feature.properties.bus_lane_planned_length}<br />`;
+      }
       if (feature.properties.bus_lane_ratio) {
-        popupContent += `<b>אחוז העדפה סה"כ:</b> ${Math.round(
+        popupContent += `<b>אחוז העדפה סה"כ:</b> ${
           feature.properties.bus_lane_ratio * 100
-        )}%<br /><br />`;
+        }%<br />`;
+      }
+      if (feature.properties.bus_lane_existing_ratio) {
+        popupContent += `<b>אחוז העדפה קיים:</b> ${
+          feature.properties.bus_lane_existing_ratio * 100
+        }%<br />`;
+      }
+      if (feature.properties.bus_lane_planned_ratio) {
+        popupContent += `<b>אחוז העדפה מתוכנן:</b> ${
+          feature.properties.bus_lane_planned_ratio * 100
+        }%<br />`;
       }
 
-      popupContent += `<b>תדירות שעות שיא בוקר:</b> לחשב מחדש<br /><b>תדירות שעות שיא ערב:</b> לחשב מחדש<br /><b>תדירות שעתית מקסימלית:</b> לחשב מחדש<br />`;
+      popupContent += `<br />`;
 
+      // morning_peak 	evening_peak 	max_hourly_freq
+      if (feature.properties.morning_peak) {
+        popupContent += `<b>תדירות שעות שיא בוקר:</b> ${feature.properties.morning_peak}<br />`;
+      }
+      if (feature.properties.evening_peak) {
+        popupContent += `<b>תדירות שעות שיא ערב:</b> ${feature.properties.evening_peak}<br />`;
+      }
+      if (feature.properties.max_hourly_freq) {
+        popupContent += `<b>תדירות שעתית מקסימלית:</b> ${feature.properties.max_hourly_freq}<br />`;
+      }
       popupContent += `</div>`;
       layer.bindPopup(popupContent);
     }
