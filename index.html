@@ -108,9 +108,10 @@
                         aria-label=".form-select-lg example">
                     </select>
                     <br />
-                    <select id="jurisRouteIdSelect" class="selectpicker form-select-lg my-3 w-100 float-right"
-                        aria-label=".form-select-lg example" data-none-selected-text="בחר חלופות" multiple>
-                        <!-- form-select form-select-lg my-3  -->
+                    בחר קווי שירות:
+                    <select id="jurisRouteIdSelect" class="form-select form-select-lg my-3"
+                        aria-label=".form-select-lg example" multiple>
+                        <!-- selectpicker form-select-lg my-3 w-100 float-right  -->
                     </select>
 
 
@@ -126,31 +127,6 @@
         </div>
     </div>
 
-    <!-- Select by Stops -->
-    <div class="modal fade" id="StopsModal" tabindex="-1" aria-labelledby="StopsModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="StopsModalLabel">בחר קווי שירות לפי תחנות משורתות</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <ion-icon name="location-outline" class="fs-4"></ion-icon>
-                    בחר רשות: <br />
-                    <select id="StopsSelect" class="form-select form-select-lg my-3"
-                        aria-label=".form-select-lg example">
-                    </select>
-                </div>
-
-
-                <div class="modal-footer">
-
-                    <button type="button" id="stops_select_btn" class="btn btn-primary" data-bs-dismiss="modal">בחר
-                        קווים</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Volume Modal -->
     <div class="modal fade" id="VolumeModal" tabindex="-1" aria-labelledby="VolumeModalLabel" aria-hidden="true">

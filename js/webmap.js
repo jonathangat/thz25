@@ -1,5 +1,8 @@
 // wait for DOM to be fully loaded
 document.addEventListener("DOMContentLoaded", async () => {
+  // set query base
+  var query_base = "https://jonathang.carto.com/api/v2/";
+
   //set up map
   var map = L.map("map", { zoomControl: false }).setView(
     [31.950124877508276, 34.80287893972995],
@@ -67,7 +70,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // ADD LAYER CONTROL TO MAP
-  var layerControl = L.control.layers(null, null);
+  var layerControl = L.control.layers(null, null, { collapsed: false });
   layerControl.addTo(map);
 
   // ADD LEGEND
@@ -271,7 +274,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         let html = "";
         data.rows.forEach(function (element) {
           html +=
-            "<option>" + route_type_name(element.c_line_type) + "</option>";
+            `<option value=${element.c_line_type}>` +
+            route_type_name(element.c_line_type) +
+            "</option>";
         });
         document.getElementById("jurisTypeSelect").innerHTML = html;
       });
@@ -286,21 +291,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     // specify query
     let q = `https://jonathang.carto.com/api/v2/sql?q=SELECT  route_id, route_short_name, origin_terminal_name, destination_terminal_name FROM planned_service CROSS JOIN muni_layer WHERE st_intersects(planned_service.the_geom, muni_layer.the_geom) AND muni_name = '${juris_value}' AND c_line_type = ${type_value} ORDER BY c_line_type ASC`;
 
-    // remove all options in dropdown
-
-    // fetch
     let request = fetch(q);
-    let html = "";
-
-    var $multiSelectOptions = $("#jurisRouteIdSelect option");
-
-    $multiSelectOptions.each(function (index, element) {
-      element.remove();
-      $("#jurisRouteIdSelect").selectpicker("refresh");
-      console.log(element.value + "removed");
-    });
-
-    console.log("empty!!!");
+    var html = "";
 
     request
       .then(function (response) {
@@ -315,31 +307,25 @@ document.addEventListener("DOMContentLoaded", async () => {
             } אל ${element.destination_terminal_name}` +
             "</option>";
         });
-        // refresh
-        console.log(html);
-        $("#jurisRouteIdSelect").html(html).selectpicker("refresh");
+        document.getElementById("jurisRouteIdSelect").innerHTML = html;
       });
   }
 
-  // function to populate the jurisSelect dropdown
-  async function populate_stops_select() {
-    // specify query
-    let q =
-      "https://jonathang.carto.com/api/v2/sql?q=SELECT DISTINCT stop_muni.muni_name FROM (SELECT trip_id, stop_id FROM stop_times) AS trip_stop LEFT JOIN (SELECT stops.stop_id, muni_layer.muni_name FROM stops CROSS JOIN muni_layer WHERE ST_WITHIN(stops.the_geom,muni_layer.the_geom)) AS stop_muni ON trip_stop.stop_id = stop_muni.stop_id WHERE stop_muni.muni_name IS NOT NULL ORDER BY 1 ASC";
+  // get JurisRoute Query
+  function getJurisRouteQuery() {
+    let selectedRoutes = document.getElementById("jurisRouteIdSelect");
+    let selectedRoutesIds = [...selectedRoutes.selectedOptions].map(
+      (option) => option.value
+    );
+    let selectedRoutesIdsString = selectedRoutesIds.join(",");
 
-    // fetch
-    let request = fetch(q);
-    request
-      .then(function (response) {
-        return response.json();
-      })
-      .then(function (data) {
-        let html = "";
-        data.rows.forEach(function (element) {
-          html += "<option>" + element.muni_name + "</option>";
-        });
-        document.getElementById("StopsSelect").innerHTML = html;
-      });
+    let query_component = encodeURIComponent(
+      `SELECT * FROM planned_service WHERE route_id IN (${selectedRoutesIdsString});`
+    );
+
+    let query = query_base + "sql?format=GeoJSON&q=" + query_component;
+
+    return query;
   }
 
   // add an empty route layer
@@ -375,10 +361,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       `SELECT segment_id, (${columns_to_sum}) AS volume, the_geom FROM volumes;`
     );
 
-    return (
-      "https://jonathang.carto.com/api/v2/sql?format=GeoJSON&q=" +
-      query_component
-    );
+    return query_base + "sql?format=GeoJSON&q=" + query_component;
   }
 
   // get volumes
@@ -388,6 +371,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // clear previous queries
     volumeLayer.clearLayers();
+
+    // clear layer control
+    layerControl.removeLayer(volumeLayer);
 
     function getColor(d) {
       return d > 40
@@ -436,8 +422,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     $("#VolumeModal").modal("toggle");
   }
 
-  // get all routes
-  async function get_all_routes() {
+  // get routes by query
+  async function getRoutes(q) {
     // start spinning!
     map.spin(true);
 
@@ -460,12 +446,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // clear previous queries
     routeLayer.clearLayers();
-    // query string
-    let sqlGetAllRoutes =
-      "https://jonathang.carto.com/api/v2/sql?format=GeoJSON&q=SELECT%20*%20FROM%20planned_service";
 
     // fetch request
-    let request = fetch(sqlGetAllRoutes);
+    let request = fetch(q);
 
     // reset highlight
     function resetHighlight(e) {
@@ -574,6 +557,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // stop spinning
     map.spin(false);
+  }
+
+  // get all routes
+  async function get_all_routes() {
+    getRoutes(
+      "https://jonathang.carto.com/api/v2/sql?format=GeoJSON&q=SELECT%20*%20FROM%20planned_service"
+    );
+  }
+
+  // get juris routes
+  async function get_juris_routes() {
+    getRoutes(getJurisRouteQuery());
   }
 
   ///////////////////////////////////////////////
@@ -715,199 +710,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   get_all_terminals();
 
-  ////////////////////////////////////////////////////////////////
-
-  // get juris routes
-  // add key values
-  // https://stackoverflow.com/questions/27219/keeping-key-value-pairs-together-in-html-select-with-jquery
-  async function get_juris_routes() {
-    // start spinning!
-    map.spin(true);
-
-    // get juris value
-    let juris_value = document.getElementById("jurisSelect").value;
-
-    // get route_short_name
-    let route_short_name = document.getElementById("jurisRouteIdSelect").value;
-
-    // clear previous queries
-    routeLayer.clearLayers();
-    // query string
-    let sqlGetRouteByShortName = `https://jonathang.carto.com/api/v2/sql?format=GeoJSON&q=SELECT * FROM planned_service WHERE route_short_name ='${route_short_name}'`;
-    // let sqlGetJurisRoutes = `https://jonathang.carto.com/api/v2/sql?format=GeoJSON&q=SELECT planned_service.* FROM planned_service CROSS JOIN muni_layer  WHERE st_intersects(planned_service.the_geom, muni_layer.the_geom) AND muni_name = '${juris_value}'`;
-    // let sqlGetJurisRoutes = `https://jonathang.carto.com/api/v2/sql?format=GeoJSON&q=SELECT * FROM planned_service WHERE shape_id IN (SELECT DISTINCT trip_stop.trip_id FROM (SELECT trip_id, stop_id FROM stop_times) AS trip_stop LEFT JOIN (SELECT stops.stop_id, muni_layer.muni_name FROM stops CROSS JOIN muni_layer WHERE ST_WITHIN(stops.the_geom,muni_layer.the_geom)) AS stop_muni ON trip_stop.stop_id = stop_muni.stop_id WHERE stop_muni.muni_name = '${juris_value}')`;
-
-    // fetch request
-    let request = fetch(sqlGetRouteByShortName);
-
-    // reset highlight
-    function resetHighlight(e) {
-      geojson.resetStyle(e.target);
-    }
-
-    // on each feature
-    function onEachFeature(feature, layer) {
-      layer.on({
-        mouseover: highlightFeature,
-        mouseout: resetHighlight,
-        // click: clickFeature,
-      });
-
-      // build popup content
-      let popupContent = `<div class="popupcontent">`;
-      if (feature.properties.route_short_name) {
-        popupContent += `<span class="popupHeader">חלופה: ${feature.properties.route_short_name}</span><br style="display: block;margin: 2px 0;" />`;
-      }
-      if (feature.properties.route_desc) {
-        popupContent += `<b>תיאור חלופה: </b>${feature.properties.route_desc}<br />`;
-      }
-      if (feature.properties.direction_id) {
-        popupContent += `<b>כיוון חלופה: </b>${feature.properties.direction_id}<br />`;
-      }
-      if (feature.properties.origin_terminal_id) {
-        popupContent += `<b>מזהה מסוף מוצא: </b>${feature.properties.origin_terminal_id}<br />`;
-      }
-      if (feature.properties.origin_terminal_name) {
-        popupContent += `<b>שם מסוף מוצא: </b>${feature.properties.origin_terminal_name}<br />`;
-      }
-      if (feature.properties.origin_terminal_id) {
-        popupContent += `<b>מזהה מסוף יעד: </b>${feature.properties.destination_terminal_id}<br />`;
-      }
-      if (feature.properties.origin_terminal_name) {
-        popupContent += `<b>שם מסוף יעד: </b>${feature.properties.destination_terminal_name}<br />`;
-      }
-
-      if (
-        feature.properties.freq_5 +
-        feature.properties.freq_6 +
-        feature.properties.freq_7 +
-        feature.properties.freq_8 +
-        feature.properties.freq_9 +
-        feature.properties.freq_10 +
-        feature.properties.freq_11 +
-        feature.properties.freq_12 +
-        feature.properties.freq_13 +
-        feature.properties.freq_14 +
-        feature.properties.freq_15 +
-        feature.properties.freq_16 +
-        feature.properties.freq_17 +
-        feature.properties.freq_18 +
-        feature.properties.freq_19 +
-        feature.properties.freq_20 +
-        feature.properties.freq_21 +
-        feature.properties.freq_22 +
-        feature.properties.freq_23 +
-        feature.properties.freq_24
-      ) {
-        popupContent += "<br /><b>תדירויות מתוכננות (שלישי)</b><br />";
-      }
-
-      if (feature.properties.freq_5) {
-        popupContent += `<b>05:00</b> ${feature.properties.freq_5} יציאות<br />`;
-      }
-      if (feature.properties.freq_6) {
-        popupContent += `<b>06:00</b> ${feature.properties.freq_6} יציאות<br />`;
-      }
-      if (feature.properties.freq_7) {
-        popupContent += `<b>07:00</b> ${feature.properties.freq_7} יציאות<br />`;
-      }
-      if (feature.properties.freq_8) {
-        popupContent += `<b>08:00</b> ${feature.properties.freq_8} יציאות<br />`;
-      }
-      if (feature.properties.freq_9) {
-        popupContent += `<b>09:00</b> ${feature.properties.freq_9} יציאות<br />`;
-      }
-      if (feature.properties.freq_10) {
-        popupContent += `<b>10:00</b> ${feature.properties.freq_10} יציאות<br />`;
-      }
-      if (feature.properties.freq_11) {
-        popupContent += `<b>11:00</b> ${feature.properties.freq_11} יציאות<br />`;
-      }
-      if (feature.properties.freq_12) {
-        popupContent += `<b>12:00</b> ${feature.properties.freq_12} יציאות<br />`;
-      }
-      if (feature.properties.freq_13) {
-        popupContent += `<b>13:00</b> ${feature.properties.freq_13} יציאות<br />`;
-      }
-      if (feature.properties.freq_14) {
-        popupContent += `<b>14:00</b> ${feature.properties.freq_14} יציאות<br />`;
-      }
-      if (feature.properties.freq_15) {
-        popupContent += `<b>15:00</b> ${feature.properties.freq_15} יציאות<br />`;
-      }
-      if (feature.properties.freq_16) {
-        popupContent += `<b>16:00</b> ${feature.properties.freq_16} יציאות<br />`;
-      }
-      if (feature.properties.freq_17) {
-        popupContent += `<b>17:00</b> ${feature.properties.freq_17} יציאות<br />`;
-      }
-      if (feature.properties.freq_18) {
-        popupContent += `<b>18:00</b> ${feature.properties.freq_18} יציאות<br />`;
-      }
-      if (feature.properties.freq_19) {
-        popupContent += `<b>19:00</b> ${feature.properties.freq_19} יציאות<br />`;
-      }
-      if (feature.properties.freq_20) {
-        popupContent += `<b>20:00</b> ${feature.properties.freq_20} יציאות<br />`;
-      }
-      if (feature.properties.freq_21) {
-        popupContent += `<b>21:00</b> ${feature.properties.freq_21} יציאות<br />`;
-      }
-      if (feature.properties.freq_22) {
-        popupContent += `<b>22:00</b> ${feature.properties.freq_22} יציאות<br />`;
-      }
-      if (feature.properties.freq_23) {
-        popupContent += `<b>23:00</b> ${feature.properties.freq_23} יציאות<br />`;
-      }
-      if (feature.properties.freq_24) {
-        popupContent += `<b>24:00</b> ${feature.properties.freq_24} יציאות<br />`;
-      }
-
-      popupContent += "<br />";
-
-      if (feature.properties.route_length) {
-        popupContent += `<b>אורך מסלול בק"מ:</b> ${Math.round(
-          feature.properties.route_length / 1000
-        )}<br />`;
-      }
-      if (feature.properties.bus_lane_length) {
-        popupContent += `<b>מתוכם נתיבי העדפה:</b> ${Math.round(
-          feature.properties.bus_lane_length / 1000
-        )}<br />`;
-      }
-      if (feature.properties.bus_lane_ratio) {
-        popupContent += `<b>אחוז העדפה מתוך אורך מסלול:</b> ${Math.round(
-          feature.properties.bus_lane_ratio * 100
-        )}%<br />`;
-      }
-
-      popupContent += `</div>`;
-      layer.bindPopup(popupContent);
-    }
-
-    // parse request to geojson object
-    let parsed_geojson = await request.then((response) => response.json());
-
-    let geojson = L.geoJson(parsed_geojson, {
-      onEachFeature: onEachFeature,
-    }).addTo(routeLayer);
-
-    // fly to bounds
-    map.flyToBounds(routeLayer.getBounds());
-
-    // add layer to map
-    routeLayer.addTo(map);
-
-    // clear layer control
-    layerControl.removeLayer(routeLayer);
-
-    // add to layer control
-    layerControl.addOverlay(routeLayer, "קווי שירות");
-
-    // stop spinning
-    map.spin(false);
-  }
-
   // Volume Modal - Populate selectVolumeFrom
   async function PopulateSelectVolumeFrom() {
     let html = "";
@@ -917,7 +719,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("SelectVolumeFrom").innerHTML = html;
   }
 
-  // Volume Modal - Populate SelectVolumeTo
+  // Volume Modal - Populate SelectVolumeTo and SelectVolumeTo
   async function PopulateSelectVolumeTo() {
     let fromHour = document.getElementById("SelectVolumeFrom").value;
     let fromHourInt = parseInt(fromHour);
@@ -930,6 +732,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Populate Modal SelectVolumeFrom
   PopulateSelectVolumeFrom();
+  PopulateSelectVolumeTo();
 
   // add listeners
 
@@ -960,4 +763,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   document
     .getElementById("getVolumesBtn")
     .addEventListener("click", get_volumes);
+
+  document
+    .getElementById("juris_select_btn")
+    .addEventListener("click", get_juris_routes);
 });
