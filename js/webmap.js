@@ -1,8 +1,10 @@
 // wait for DOM to be fully loaded
 document.addEventListener("DOMContentLoaded", async () => {
   //set up map
-  var map = L.map("map").setView([31.950124877508276, 34.80287893972995], 10);
-  let legend = L.control({ position: "bottomleft" });
+  var map = L.map("map", { zoomControl: false }).setView(
+    [31.950124877508276, 34.80287893972995],
+    10
+  );
 
   function route_type_name(code) {
     if (code === 1) return "עורקי";
@@ -67,6 +69,87 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ADD LAYER CONTROL TO MAP
   var layerControl = L.control.layers(null, null);
   layerControl.addTo(map);
+
+  // ADD LEGEND
+  let route_type_legend = {
+    עורקי: "#a6cee3",
+    מקומי: "#1f78b4",
+    אזורי: "#b2df8a",
+    "בינעירוני מטרופוליני": "#33a02c",
+    "בינעירוני ארצי": "#fb9a99",
+    "פרימיום מטרופוליני": "#e31a1c",
+    'מתע"ן': "#fdbf6f",
+    אחר: "gray",
+  };
+
+  let bus_lane_symbology = {
+    קיים: "#f9bf00",
+    מקודם: "#be0067",
+    "אושר בועדה מטרופולינית": "#1d4ccc",
+    "תכנון פרוגרמטי": "#92caea",
+    "רשת צירי העדפה 2030+": "#b5b5b5",
+    אחר: "gray",
+  };
+
+  let volume_symbology = {
+    "10-0": "green",
+    "20-10": "yellow",
+    "30-20": "blue",
+    "40-30": "red",
+    "40+": "purple",
+  };
+
+  let terminal_symbology = {
+    "מסוף גדול": "./img/symbols/terminals/large.png",
+    "מסוף בינוני": "./img/symbols/terminals/medium.png",
+    "מסוף קטן": "./img/symbols/terminals/small.png",
+    "חניון לילה": "./img/symbols/terminals/night.png",
+    "מתקן משולב": "./img/symbols/terminals/multi.png",
+  };
+
+  // add legend
+  let legend = L.control({ position: "topleft" });
+  legend.onAdd = function () {
+    let div = L.DomUtil.create("div", "legend");
+    // service lines
+    let legendContent = "<b>מקרא</b><br />" + "<small>קווי שירות</small><br />";
+    for (let i = 0; i < Object.keys(route_type_legend).length; i++) {
+      legendContent += `<i style="background-color: ${
+        Object.values(route_type_legend)[i]
+      }"></i>${Object.keys(route_type_legend)[i]}<br />`;
+    }
+
+    // bus terminals
+    legendContent += "<br /><small>מסופים</small><br />";
+    for (let i = 0; i < Object.keys(terminal_symbology).length; i++) {
+      legendContent += `<i style="background-image: url(${
+        Object.values(terminal_symbology)[i]
+      });background-repeat: no-repeat;background-size: contain;border-radius: 0%"></i>${
+        Object.keys(terminal_symbology)[i]
+      }<br />`;
+    }
+    // bus lanes
+    legendContent += "<br /><small>נתיבי העדפה</small><br />";
+    for (let i = 0; i < Object.keys(bus_lane_symbology).length; i++) {
+      legendContent += `<i style="background-color:${
+        Object.values(bus_lane_symbology)[i]
+      }"></i>${Object.keys(bus_lane_symbology)[i]}<br />`;
+    }
+
+    // volumes
+    legendContent += "<br /><small>נפחים</small><br />";
+    for (let i = 0; i < Object.keys(volume_symbology).length; i++) {
+      legendContent += `<i style="background-color: ${
+        Object.values(volume_symbology)[i]
+      }"></i>${Object.keys(volume_symbology)[i]}<br />`;
+    }
+
+    // assign html
+    div.innerHTML = legendContent;
+    return div;
+  };
+
+  legend.addTo(map);
 
   // LOAD BUS LANES LAYER
   var bus_lanes_layer_group = L.layerGroup();
@@ -264,6 +347,94 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // add an empty terminal layer
   let terminalLayer = L.featureGroup();
+
+  // add an empty volumn layer
+  let volumeLayer = L.featureGroup();
+
+  // get volumes query
+  function get_volume_query() {
+    // get values
+    let fromHour = document.getElementById("SelectVolumeFrom").value;
+    let fromHourInt = parseInt(fromHour);
+    let toHour = document.getElementById("SelectVolumeTo").value;
+    let toHourInt = parseInt(toHour);
+
+    if (toHourInt == "") {
+      toHourInt = fromHourInt + 1;
+    }
+
+    let freq_cols = [];
+
+    for (let i = fromHourInt; i < toHourInt; i++) {
+      freq_cols.push(`freq_${i}`);
+    }
+
+    let columns_to_sum = freq_cols.join("+");
+
+    let query_component = encodeURIComponent(
+      `SELECT segment_id, (${columns_to_sum}) AS volume, the_geom FROM volumes;`
+    );
+
+    return (
+      "https://jonathang.carto.com/api/v2/sql?format=GeoJSON&q=" +
+      query_component
+    );
+  }
+
+  // get volumes
+  async function get_volumes() {
+    // start spinning!
+    map.spin(true);
+
+    // clear previous queries
+    volumeLayer.clearLayers();
+
+    function getColor(d) {
+      return d > 40
+        ? "purple"
+        : d > 30
+        ? "red"
+        : d > 20
+        ? "blue"
+        : d > 10
+        ? "yellow"
+        : d > 0
+        ? "green"
+        : "gray";
+    }
+
+    function volume_style(feature) {
+      return {
+        color: getColor(feature.properties.volume),
+      };
+    }
+
+    // fetch data
+    var fetch_volumes = await fetch(get_volume_query()).then((response) =>
+      response.json()
+    );
+
+    // parse to geojson
+    let geojson = L.geoJson(fetch_volumes, {
+      // onEachFeature: onEachFeature,
+      style: volume_style,
+    }).addTo(volumeLayer);
+
+    // add to map
+    volumeLayer.addTo(map);
+
+    // add to layer control
+    layerControl.addOverlay(volumeLayer, "מפת נפחים");
+
+    // fly to bounds
+    map.flyToBounds(volumeLayer.getBounds());
+
+    // stop spinning
+    map.spin(false);
+
+    // close modal
+    $("#VolumeModal").modal("toggle");
+  }
 
   // get all routes
   async function get_all_routes() {
@@ -746,12 +917,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("SelectVolumeFrom").innerHTML = html;
   }
 
-  // Volume Modal - Populate selectVolumeFrom
+  // Volume Modal - Populate SelectVolumeTo
   async function PopulateSelectVolumeTo() {
     let fromHour = document.getElementById("SelectVolumeFrom").value;
     let fromHourInt = parseInt(fromHour);
     let html = "";
-    for (let i = fromHourInt; i < 25; i++) {
+    for (let i = fromHourInt + 1; i < 25; i++) {
       html += `<option>${i}</option>`;
     }
     document.getElementById("SelectVolumeTo").innerHTML = html;
@@ -785,4 +956,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   document
     .getElementById("SelectVolumeFrom")
     .addEventListener("click", PopulateSelectVolumeTo);
+
+  document
+    .getElementById("getVolumesBtn")
+    .addEventListener("click", get_volumes);
 });
