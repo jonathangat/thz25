@@ -446,6 +446,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // clear previous queries
     routeLayer.clearLayers();
+    layerControl.removeLayer(routeLayer);
 
     // fetch request
     let request = fetch(q);
